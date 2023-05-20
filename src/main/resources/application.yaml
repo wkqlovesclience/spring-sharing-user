@@ -1,0 +1,57 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: springboot-sharding
+  #mybatis-plus ???????
+  datasource:
+    dynamic:
+      primary: ds
+      type: com.alibaba.druid.pool.DruidDataSource
+      datasource:
+        ds:
+          driver-class-name: com.mysql.jdbc.Driver
+          url: jdbc:mysql://120.48.116.198/ds?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
+          username: root
+          password: 123456
+  shardingsphere:
+    datasource:
+      names: ds
+      #ds ??
+      ds:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://120.48.116.198/ds?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false
+        username: root
+        password: 123456
+    sharding:
+      # ??????: ??id????????????
+#      default-database-strategy:
+#        inline:
+#          sharding-column: order_id
+#          algorithm-expression: ds$->{order_id % 2}
+      tables:
+        # ????
+        user:
+          actual-data-nodes: ds.user_$->{0..2}
+          table-strategy:
+            # ?????????????phone
+            inline:
+              sharding-column: phone
+              algorithm-expression: user_$->{phone % 3}
+          # ?? SNOWFLAKE
+          key-generator:
+            column: phone
+            type: SNOWFLAKE
+    ## ??sql
+    props:
+      sql:
+        show: true
+
+logging:
+  config: classpath:logback.xml
+
+# mybatis??
+mybatis-plus:
+  mapper-locations: classpath*:/mappers/*.xml
